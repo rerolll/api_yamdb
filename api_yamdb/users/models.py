@@ -1,9 +1,10 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.core.mail import send_mail
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 import random
+
+from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.core.validators import RegexValidator
+from django.db import models
 
 
 class UserRoles(models.TextChoices):
@@ -15,17 +16,25 @@ class UserRoles(models.TextChoices):
 class User(AbstractUser):
     username = models.CharField(
         verbose_name='Никнейм', max_length=150,
-        unique=True, validators=[RegexValidator(
-            r'^[\w.@+-]+\Z', 'В никнейме допустимы только цифры, буквы и символы @/./+/-/_'
-        )]
+        unique=True, validators=[
+            RegexValidator(
+                r'^[\w.@+-]+\Z',
+                'В никнейме допустимы только цифры, буквы и символы @/./+/-/_'
+            )
+        ]
     )
     email = models.EmailField(
         verbose_name='Электронная почта', max_length=254, unique=True
     )
-    first_name = models.CharField(verbose_name='Имя', max_length=150, blank=True)
-    last_name = models.CharField(verbose_name='Фамилия', max_length=150, blank=True)
+    first_name = models.CharField(
+        verbose_name='Имя', max_length=150, blank=True
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия', max_length=150, blank=True
+    )
     role = models.CharField(
-        verbose_name='Роль', choices=UserRoles.choices, default=UserRoles.USER, max_length=20
+        verbose_name='Роль', choices=UserRoles.choices,
+        default=UserRoles.USER, max_length=20
     )
     bio = models.CharField(verbose_name='Био', blank=True, max_length=200)
     confirmation_code = models.CharField(

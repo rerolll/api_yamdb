@@ -1,12 +1,11 @@
 from django.core.mail import send_mail
-
-from rest_framework import generics, status, mixins, viewsets
-from rest_framework.response import Response
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import AllowAny
-
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
+
 from .serializers import UserSerializer
 
 
