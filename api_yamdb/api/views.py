@@ -7,22 +7,41 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 
-from .serializers import (ManualUserCreateSerializer, UserCreateSerializer,
-                          UserListSerializer,
+from .serializers import (UserCreateSerializer,
                           UserRetrieveUpdateDestroySerializer,
-                          UserRetrieveUpdateSerializer)
+                          UserRetrieveUpdateSerializer,
+                          UserBasicSerializer)
 
 User = get_user_model()
 
 
-class UserCreateView(generics.CreateAPIView):
+class BasicUserCreateView(generics.CreateAPIView):
+    def perform_create(self, serializer):
+        user = serializer.save()
+        user.generate_confirmation_code()
+        user.save()
+
+
+class BasicUserUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    def patch(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
+class UserCreateView(BasicUserCreateView):
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
 
 
-class UserListCreateView(generics.ListCreateAPIView):
+class UserListCreateView(BasicUserCreateView):
     queryset = User.objects.all()
-    serializer_class = UserListSerializer
+    serializer_class = UserRetrieveUpdateDestroySerializer
     permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
@@ -30,7 +49,7 @@ class UserListCreateView(generics.ListCreateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return ManualUserCreateSerializer
+            return UserBasicSerializer
         return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
@@ -60,7 +79,8 @@ class UserListCreateView(generics.ListCreateAPIView):
             )
 
 
-class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class UserRetrieveUpdateDestroyView(generics.RetrieveDestroyAPIView,
+                                    BasicUserUpdateView):
     serializer_class = UserRetrieveUpdateDestroySerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = User.objects.all()
@@ -98,34 +118,14 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             status=status.HTTP_204_NO_CONTENT
         )
 
-    def patch(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', True)
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
 
-
-class UserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+class UserRetrieveUpdateView(generics.RetrieveAPIView, BasicUserUpdateView):
     queryset = User.objects.all()
     serializer_class = UserRetrieveUpdateSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
         return self.request.user
-
-    def patch(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', True)
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

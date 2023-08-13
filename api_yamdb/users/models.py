@@ -1,10 +1,11 @@
 import random
 
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import RegexValidator
 from django.db import models
+
+from .validators import validate_username
 
 
 class UserRoles(models.TextChoices):
@@ -20,7 +21,8 @@ class User(AbstractUser):
             RegexValidator(
                 r'^[\w.@+-]+\Z',
                 'В никнейме допустимы только цифры, буквы и символы @/./+/-/_'
-            )
+            ),
+            validate_username
         ]
     )
     email = models.EmailField(
@@ -36,7 +38,7 @@ class User(AbstractUser):
         verbose_name='Роль', choices=UserRoles.choices,
         default=UserRoles.USER, max_length=20
     )
-    bio = models.CharField(verbose_name='Био', blank=True, max_length=200)
+    bio = models.TextField(verbose_name='Био', blank=True)
     confirmation_code = models.CharField(
         verbose_name='Код подтверждения', max_length=15, blank=True, null=True
     )
@@ -54,12 +56,6 @@ class User(AbstractUser):
         send_mail(
             subject, message, from_email, recipient_list, fail_silently=True
         )
-
-    def save(self, *args, **kwargs):
-        if self.username == 'me':
-            raise ValidationError("Никнейм 'me' не допустим.")
-
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'пользователь'

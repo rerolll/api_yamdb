@@ -6,66 +6,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['email', 'username']
-
-    def create(self, validated_data):
-        try:
-            user = User(**validated_data)
-            user.generate_confirmation_code()
-            user.save()
-            return user
-        except ValidationError:
-            return Response(
-                {
-                    "error":
-                    "Отсутствует обязательное поле или оно не корректно"
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-class ManualUserCreateSerializer(serializers.ModelSerializer):
+class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         ]
-
-    def create(self, validated_data):
-        try:
-            user = User(**validated_data)
-            user.generate_confirmation_code()
-            user.save()
-            return user
-        except ValidationError:
-            return Response(
-                {
-                    "error":
-                    "Отсутствует обязательное поле или оно не корректно"
-                }, status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-class UserRetrieveUpdateSerializer(serializers.ModelSerializer):
-    role = serializers.ReadOnlyField()
-
-    class Meta:
-        model = User
-        fields = [
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
-        ]
-
-
-class UserListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = '__all__'
-
-
-class UserRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         try:
@@ -77,6 +23,19 @@ class UserRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
                  },
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class UserCreateSerializer(UserBasicSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'username']
+
+
+class UserRetrieveUpdateSerializer(UserBasicSerializer):
+    role = serializers.ReadOnlyField()
+
+
+class UserRetrieveUpdateDestroySerializer(UserBasicSerializer):
 
     class Meta:
         model = User
