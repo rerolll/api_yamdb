@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class CategoryGenreBase(models.Model):
@@ -13,33 +15,32 @@ class CategoryGenreBase(models.Model):
 
 
 class Category(CategoryGenreBase):
-
     class Meta(CategoryGenreBase.Meta):
-        verbose_name = 'Категория'
+        verbose_name = "Категория"
 
 
 class Genre(CategoryGenreBase):
-
     class Meta(CategoryGenreBase.Meta):
-        verbose_name = 'Жанр'
+        verbose_name = "Жанр"
 
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.IntegerField()  #validator
+    year = models.IntegerField()
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(
         Genre,
-        blank=True,
-        related_name='title',
+        related_name="title",
     )
     category = models.ForeignKey(
         Category,
         models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='category',
+        related_name="category",
     )
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.year > timezone.now().year:
+            raise ValidationError("Year can't be in the future.")
