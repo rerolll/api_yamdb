@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Categories, Genres, Title
 from users.models import User
 
 
@@ -25,7 +25,9 @@ class UserBasicSerializer(serializers.ModelSerializer):
         except ValidationError:
             return Response(
                 {
-                    "error": "Отсутствует обязательное поле или оно не корректно"
+                    "error": (
+                        "Отсутствует обязательное поле или оно не корректно"
+                    )
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -74,13 +76,13 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = Category
+        model = Categories
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = Genre
+        model = Genres
 
 
 class TitleSerializer(serializers.ModelSerializer):

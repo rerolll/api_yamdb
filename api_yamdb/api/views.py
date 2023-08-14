@@ -1,11 +1,16 @@
 from django.contrib.auth import get_user_model
 
 from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import (
+    NotFound,
+    PermissionDenied,
+    AuthenticationFailed
+)
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.generics import ListAPIView
 
 from reviews.models import Categories, Genres, Title
 from users.models import User
@@ -22,6 +27,7 @@ from .serializers import (
     UserRetrieveUpdateSerializer
 )
 from .viewsets import CreateListDestroyViewSet
+
 
 User = get_user_model()
 
@@ -50,7 +56,7 @@ class UserCreateView(BasicUserCreateView):
     serializer_class = UserCreateSerializer
 
 
-class UserListCreateView(BasicUserCreateView):
+class UserListCreateView(BasicUserCreateView, ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserRetrieveUpdateDestroySerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -67,27 +73,17 @@ class UserListCreateView(BasicUserCreateView):
         try:
             return super().create(request, *args, **kwargs)
         except PermissionDenied:
-            return Response(
-                {"error": "Нет прав доступа"}, status=status.HTTP_403_FORBIDDEN
-            )
+            raise PermissionDenied("Нет прав доступа")
         except AuthenticationFailed:
-            return Response(
-                {"error": "Необходим JWT-токен"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            raise AuthenticationFailed("Необходим JWT-токен")
 
     def list(self, request, *args, **kwargs):
         try:
             return super().list(request, *args, **kwargs)
         except PermissionDenied:
-            return Response(
-                {"error": "Нет прав доступа"}, status=status.HTTP_403_FORBIDDEN
-            )
+            raise PermissionDenied("Нет прав доступа")
         except AuthenticationFailed:
-            return Response(
-                {"error": "Необходим JWT-токен"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            raise AuthenticationFailed("Необходим JWT-токен")
 
 
 class UserRetrieveUpdateDestroyView(
@@ -99,23 +95,14 @@ class UserRetrieveUpdateDestroyView(
 
     def get_object(self):
         username = self.kwargs.get("username")
-
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            return Response(
-                {"error": "Пользователь не найден"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            raise NotFound("Пользователь не найден")
         except PermissionDenied:
-            return Response(
-                {"error": "Нет прав доступа"}, status=status.HTTP_403_FORBIDDEN
-            )
-        except not self.request.user.is_authenticated:
-            return Response(
-                {"error": "Необходим JWT-токен"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            raise PermissionDenied("Нет прав доступа")
+        except AuthenticationFailed:
+            raise AuthenticationFailed("Необходим JWT-токен")
         return user
 
     def delete(self, request, *args, **kwargs):
@@ -143,7 +130,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         if confirmation_code is None or username is None:
             return Response(
                 {
-                    "error": "Отсутствует обязательное поле или оно некорректно."
+                    "error": (
+                        "Отсутствует обязательное поле или оно некорректно."
+                    )
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -152,10 +141,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 confirmation_code=confirmation_code, username=username
             )
         except User.DoesNotExist:
-            return Response(
-                {"error": "Пользователь не найден."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            raise NotFound("Пользователь не найден")
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             token = serializer.validated_data.get("access")

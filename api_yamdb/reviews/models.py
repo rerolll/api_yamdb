@@ -14,12 +14,12 @@ class CategoryGenreBase(models.Model):
         return self.slug
 
 
-class Category(CategoryGenreBase):
+class Categories(CategoryGenreBase):
     class Meta(CategoryGenreBase.Meta):
         verbose_name = "Категория"
 
 
-class Genre(CategoryGenreBase):
+class Genres(CategoryGenreBase):
     class Meta(CategoryGenreBase.Meta):
         verbose_name = "Жанр"
 
@@ -29,13 +29,14 @@ class Title(models.Model):
     year = models.IntegerField()
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(
-        Genre,
+        Genres,
         related_name="title",
     )
     category = models.ForeignKey(
-        Category,
+        Categories,
         models.SET_NULL,
-        related_name="category",
+        related_name="categories",
+        null=True
     )
 
     def __str__(self):

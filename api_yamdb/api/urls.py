@@ -21,9 +21,7 @@ v1_router.register("titles", TitleViewSet, basename="title")
 
 
 urlpatterns = [
-    path("v1/", include(v1_router.urls)),
-]
-urlpatterns += [
+    path("", include(v1_router.urls)),
     path(
         "auth/token/",
         CustomTokenObtainPairView.as_view(),

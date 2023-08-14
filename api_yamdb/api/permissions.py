@@ -3,7 +3,10 @@ from rest_framework import permissions
 
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_admin
+        return request.user.is_authenticated and (
+            request.user.is_staff
+            or request.user.role in ["admin", "moderator"]
+        )
 
 
 class ReadOnly(permissions.BasePermission):
@@ -16,5 +19,8 @@ class IsAuthorOrModeratorOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         if request.user.is_authenticated:
-            return obj.author == request.user or request.user.is_moderator
+            return obj.author == request.user or (
+                request.user.is_staff
+                or request.user.role in ["admin", "moderator"]
+            )
         return False
