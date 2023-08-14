@@ -5,30 +5,52 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0007_auto_20230812_0007'),
+        ("users", "0007_auto_20230812_0007"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='first_name',
-            field=models.CharField(blank=True, max_length=150, verbose_name='Имя'),
+            model_name="user",
+            name="first_name",
+            field=models.CharField(
+                blank=True, max_length=150, verbose_name="Имя"
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='last_name',
-            field=models.CharField(blank=True, max_length=150, verbose_name='Фамилия'),
+            model_name="user",
+            name="last_name",
+            field=models.CharField(
+                blank=True, max_length=150, verbose_name="Фамилия"
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='role',
-            field=models.CharField(choices=[('admin', 'Admin'), ('moderator', 'Moderator'), ('user', 'User')], default='user', max_length=20, verbose_name='Роль'),
+            model_name="user",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("admin", "Admin"),
+                    ("moderator", "Moderator"),
+                    ("user", "User"),
+                ],
+                default="user",
+                max_length=20,
+                verbose_name="Роль",
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='username',
-            field=models.CharField(max_length=150, unique=True, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+\\Z', 'Допустимы только цифры, латиница и символы "@.+-_."')], verbose_name='Никнейм'),
+            model_name="user",
+            name="username",
+            field=models.CharField(
+                max_length=150,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        "^[\\w.@+-]+\\Z",
+                        'Допустимы только цифры, латиница и символы "@.+-_."',
+                    )
+                ],
+                verbose_name="Никнейм",
+            ),
         ),
     ]

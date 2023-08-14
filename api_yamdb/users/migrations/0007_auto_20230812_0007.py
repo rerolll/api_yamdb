@@ -4,25 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0006_alter_user_password'),
+        ("users", "0006_alter_user_password"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='confirmation_code',
-            field=models.CharField(blank=True, max_length=15, null=True, verbose_name='Код подтверждения'),
+            model_name="user",
+            name="confirmation_code",
+            field=models.CharField(
+                blank=True,
+                max_length=15,
+                null=True,
+                verbose_name="Код подтверждения",
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='email',
-            field=models.EmailField(max_length=254, unique=True, verbose_name='Электронная почта'),
+            model_name="user",
+            name="email",
+            field=models.EmailField(
+                max_length=254, unique=True, verbose_name="Электронная почта"
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='username',
-            field=models.CharField(max_length=150, unique=True, verbose_name='Никнейм'),
+            model_name="user",
+            name="username",
+            field=models.CharField(
+                max_length=150, unique=True, verbose_name="Никнейм"
+            ),
         ),
     ]
