@@ -16,7 +16,12 @@ from reviews.models import Categories, Genres, Title
 from users.models import User
 
 from .filters import TitlesFilter
-from .permissions import IsAdmin, IsAuthorOrModeratorOrReadOnly, ReadOnly
+from .permissions import (
+    IsAdmin,
+    IsAuthorOrAdminOrModeratorOrReadOnly,
+    ReadOnly,
+    IsAdminOrReadOnly
+)
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -33,6 +38,7 @@ User = get_user_model()
 
 
 class BasicUserCreateView(generics.CreateAPIView):
+
     def perform_create(self, serializer):
         user = serializer.save()
         user.generate_confirmation_code()
@@ -52,6 +58,8 @@ class BasicUserUpdateView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserCreateView(BasicUserCreateView):
+    permission_classes = (permissions.AllowAny,)
+
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
 
@@ -59,7 +67,7 @@ class UserCreateView(BasicUserCreateView):
 class UserListCreateView(BasicUserCreateView, ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserRetrieveUpdateDestroySerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = IsAdmin
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ("username",)
@@ -90,7 +98,7 @@ class UserRetrieveUpdateDestroyView(
     generics.RetrieveDestroyAPIView, BasicUserUpdateView
 ):
     serializer_class = UserRetrieveUpdateDestroySerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = IsAdmin
     queryset = User.objects.all()
 
     def get_object(self):
@@ -124,6 +132,8 @@ class UserRetrieveUpdateView(generics.RetrieveAPIView, BasicUserUpdateView):
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = (permissions.AllowAny,)
+
     def post(self, request, *args, **kwargs):
         confirmation_code = request.data.get("confirmation_code")
         username = request.data.get("username")
@@ -159,11 +169,12 @@ class CategoriesGenresViewSet(CreateListDestroyViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
-    permission_classes = (IsAdmin | ReadOnly,)
+    permission_classes = IsAdminOrReadOnly
     lookup_field = "slug"
 
 
 class CategoryViewSet(CategoriesGenresViewSet):
+
     queryset = Categories.objects.all()
     serializer_class = CategorySerializer
 
@@ -177,6 +188,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAdmin | IsAuthorOrModeratorOrReadOnly,)
+    permission_classes = IsAdminOrReadOnly
     ordering_fields = ("name",)
     filterset_class = TitlesFilter
