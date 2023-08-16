@@ -23,7 +23,7 @@ class ReviewAdminForm(forms.ModelForm):
 
 class ReviewAdmin(admin.ModelAdmin):
     title = forms.ModelChoiceField(queryset=Title.objects.all(), required=True)
-    list_display = ['text', 'pub_date', 'author']
+    list_display = ['text', 'id', 'pub_date', 'author']
     list_filter = ['author', 'pub_date']
     search_fields = ['text']
     form = ReviewAdminForm
@@ -48,6 +48,7 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Genre, GenreAdmin)
+
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['text', 'id']
