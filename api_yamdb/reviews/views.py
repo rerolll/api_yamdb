@@ -6,6 +6,8 @@ from reviews.models import Title, Review, Category, Genre, Comment
 
 from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
+from api.permissions import IsAdminModeratorAuthorOrReadOnly
+
 
 class CategoriesGenresViewSet(viewsets.ModelViewSet):
     lookup_field = "slug"
@@ -28,6 +30,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
+    permission_classes = IsAdminModeratorAuthorOrReadOnly
 
     def get_title(self):
         title_id = self.kwargs.get('title_id')
@@ -42,9 +45,11 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         queryset = Review.objects.filter(title=title)
         return queryset
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = IsAdminModeratorAuthorOrReadOnly
 
     def get_queryset(self):
         review = get_object_or_404(
