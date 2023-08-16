@@ -5,6 +5,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
 
+from reviews.models import Review, Title, Category, Genre, Comment
+
 
 class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,3 +66,41 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
             attrs['access'] = str(refresh.access_token)
             attrs['refresh'] = str(refresh)
         return attrs
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Genre
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Title
+
+
+class ReviewsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+        )
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+        )
+
+    class Meta:
+        fields = '__all__'
+        model = Comment
