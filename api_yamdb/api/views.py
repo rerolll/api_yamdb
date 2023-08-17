@@ -59,18 +59,27 @@ class BasicUserUpdateView(generics.RetrieveUpdateDestroyAPIView):
 
 class UserCreateView(BasicUserCreateView):
     permission_classes = (permissions.AllowAny,)
-
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.status_code = 200
+        return response
 
-class UserListCreateView(BasicUserCreateView, ListAPIView):
+
+class UserListCreateView(generics.CreateAPIView, ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserRetrieveUpdateDestroySerializer
-    permission_classes = IsAdmin
+    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ("username",)
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        user.generate_confirmation_code_no_email()
+        user.save()
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -98,7 +107,7 @@ class UserRetrieveUpdateDestroyView(
     generics.RetrieveDestroyAPIView, BasicUserUpdateView
 ):
     serializer_class = UserRetrieveUpdateDestroySerializer
-    permission_classes = IsAdmin
+    permission_classes = (IsAdmin,)
     queryset = User.objects.all()
 
     def get_object(self):
@@ -119,6 +128,12 @@ class UserRetrieveUpdateDestroyView(
         return Response(
             {"message": "Удачное выполнение запроса"},
             status=status.HTTP_204_NO_CONTENT,
+        )
+    
+    def update(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "Метод не разрешён"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
 
 
@@ -153,6 +168,11 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         except User.DoesNotExist:
             raise NotFound("Пользователь не найден")
         serializer = self.get_serializer(data=request.data)
+        if not user.check_confirmation_code(confirmation_code):
+            return Response(
+                {"error": "Некорректный код подтверждения"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if serializer.is_valid():
             token = serializer.validated_data.get("access")
             refresh_token = serializer.validated_data.get("refresh")
@@ -169,7 +189,7 @@ class CategoriesGenresViewSet(CreateListDestroyViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
-    permission_classes = IsAdminOrReadOnly
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = "slug"
 
 
@@ -188,6 +208,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
-    permission_classes = IsAdminOrReadOnly
+    permission_classes = (IsAdminOrReadOnly,)
     ordering_fields = ("name",)
     filterset_class = TitlesFilter

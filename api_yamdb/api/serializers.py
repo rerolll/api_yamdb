@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Categories, Genres, Title
 from users.models import User
 
-from reviews.models import Review, Title, Category, Genre, Comment
+from reviews.models import Review, Title, Categories, Genres, Comment
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
@@ -49,7 +49,7 @@ class UserRetrieveUpdateSerializer(UserBasicSerializer):
 class UserRetrieveUpdateDestroySerializer(UserBasicSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ["username", "email", "role", "first_name", "last_name", "bio"]
 
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
@@ -85,7 +85,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = Genre
+        model = Genres
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -106,7 +106,7 @@ class TitleSerializer(serializers.ModelSerializer):
 class ReviewsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
-        )
+    )
 
     class Meta:
         fields = '__all__'
@@ -116,7 +116,7 @@ class ReviewsSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
-        )
+    )
 
     class Meta:
         fields = '__all__'

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Title, Review, Category, Genre, Comment
+from .models import Title, Review, Categories, Genres, Comment
 
 
 class TitleAdmin(admin.ModelAdmin):
@@ -38,7 +38,7 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
-admin.site.register(Category, CategoryAdmin)
+admin.site.register(Categories, CategoryAdmin)
 
 
 class GenreAdmin(admin.ModelAdmin):
@@ -47,7 +47,7 @@ class GenreAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
-admin.site.register(Genre, GenreAdmin)
+admin.site.register(Genres, GenreAdmin)
 
 
 class CommentAdmin(admin.ModelAdmin):

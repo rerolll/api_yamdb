@@ -52,6 +52,10 @@ class User(AbstractUser):
         self.confirmation_code = code
         self.send_confirmation_email(code)
 
+    def generate_confirmation_code_no_email(self):
+        code = "".join(random.choices("0123456789", k=15))
+        self.confirmation_code = code
+
     def send_confirmation_email(self, code):
         subject = "Your confirmation code"
         message = f"Ваш код подтверждения: {code}"
@@ -60,6 +64,11 @@ class User(AbstractUser):
         send_mail(
             subject, message, from_email, recipient_list, fail_silently=True
         )
+
+    def check_confirmation_code(self, confirmation_code):
+        if self.confrimation_code == confirmation_code:
+            return True
+
 
     class Meta:
         verbose_name = "пользователь"

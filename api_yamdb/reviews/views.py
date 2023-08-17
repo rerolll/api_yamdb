@@ -2,11 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 
 from api.serializers import ReviewsSerializer, CommentSerializer
-from reviews.models import Title, Review, Category, Genre, Comment
+from reviews.models import Title, Review, Categories, Genres, Comment
 
 from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
-from api.permissions import IsAdminModeratorAuthorOrReadOnly
+from api.permissions import IsAuthorOrAdminOrModeratorOrReadOnly
 
 
 class CategoriesGenresViewSet(viewsets.ModelViewSet):
@@ -14,12 +14,12 @@ class CategoriesGenresViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(CategoriesGenresViewSet):
-    queryset = Category.objects.all()
+    queryset = Categories.objects.all()
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(CategoriesGenresViewSet):
-    queryset = Genre.objects.all()
+    queryset = Genres.objects.all()
     serializer_class = GenreSerializer
 
 
@@ -30,7 +30,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
-    permission_classes = [IsAdminModeratorAuthorOrReadOnly]
+    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
 
     def get_title(self):
         title_id = self.kwargs.get('title_id')
@@ -49,7 +49,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAdminModeratorAuthorOrReadOnly]
+    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
