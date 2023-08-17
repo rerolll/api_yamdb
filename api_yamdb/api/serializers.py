@@ -4,10 +4,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Categories, Genres, Title
+from reviews.models import Categories, Genres, Titles
 from users.models import User
 
-from reviews.models import Review, Title, Categories, Genres, Comment
+from reviews.models import Review, Titles, Categories, Genres, Comment
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
@@ -37,6 +37,7 @@ class UserBasicSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(UserBasicSerializer):
+
     class Meta:
         model = User
         fields = ["email", "username"]
@@ -100,7 +101,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = "__all__"
-        model = Title
+        model = Titles
 
 
 class ReviewsSerializer(serializers.ModelSerializer):

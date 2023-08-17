@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 
 from api.serializers import ReviewsSerializer, CommentSerializer
-from reviews.models import Title, Review, Categories, Genres, Comment
+from reviews.models import Titles, Review, Categories, Genres, Comment
 
 from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
@@ -24,7 +24,7 @@ class GenreViewSet(CategoriesGenresViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Titles.objects.all()
     serializer_class = TitleSerializer
 
 

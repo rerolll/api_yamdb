@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.generics import ListAPIView
 
-from reviews.models import Categories, Genres, Title
+from reviews.models import Categories, Genres, Titles
 from users.models import User
 
 from .filters import TitlesFilter
@@ -205,7 +205,7 @@ class GenreViewSet(CategoriesGenresViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Titles.objects.all()
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)

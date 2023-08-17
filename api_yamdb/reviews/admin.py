@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Title, Review, Categories, Genres, Comment
+from .models import Titles, Review, Categories, Genres, Comment
 
 
 class TitleAdmin(admin.ModelAdmin):
@@ -10,7 +10,7 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
-admin.site.register(Title, TitleAdmin)
+admin.site.register(Titles, TitleAdmin)
 
 
 class ReviewAdminForm(forms.ModelForm):
@@ -18,11 +18,11 @@ class ReviewAdminForm(forms.ModelForm):
         model = Review
         fields = '__all__'
 
-    title = forms.ModelChoiceField(queryset=Title.objects.all(), required=True)
+    title = forms.ModelChoiceField(queryset=Titles.objects.all(), required=True)
 
 
 class ReviewAdmin(admin.ModelAdmin):
-    title = forms.ModelChoiceField(queryset=Title.objects.all(), required=True)
+    title = forms.ModelChoiceField(queryset=Titles.objects.all(), required=True)
     list_display = ['text', 'id', 'pub_date', 'author']
     list_filter = ['author', 'pub_date']
     search_fields = ['text']

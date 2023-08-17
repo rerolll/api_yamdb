@@ -28,7 +28,7 @@ class Genres(CategoryGenreBase):
         verbose_name = "Жанр"
 
 
-class Title(models.Model):
+class Titles(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(blank=True)
@@ -54,7 +54,7 @@ User = get_user_model()
 
 
 class Review(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='reviews')
+    title = models.ForeignKey(Titles, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField(verbose_name='text field')
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
