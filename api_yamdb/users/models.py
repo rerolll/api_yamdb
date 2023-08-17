@@ -65,9 +65,8 @@ class User(AbstractUser):
             subject, message, from_email, recipient_list, fail_silently=True
         )
 
-    def check_confirmation_code(self, confirmation_code):
-        if self.confrimation_code == confirmation_code:
-            return True
+    def check_confirmation_code(self, code):
+        return self.confirmation_code == code
 
 
     class Meta:

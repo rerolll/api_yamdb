@@ -4,7 +4,8 @@ from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.exceptions import (
     NotFound,
     PermissionDenied,
-    AuthenticationFailed
+    AuthenticationFailed,
+    ValidationError
 )
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -63,6 +64,19 @@ class UserCreateView(BasicUserCreateView):
     serializer_class = UserCreateSerializer
 
     def create(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        try:
+            existing_user = User.objects.get(username=username, email=email)
+            existing_user.generate_confirmation_code()
+            existing_user.save()
+            response_data = {
+                "detail": "User already exists. New confirmation code has been sent."
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            pass
+
         response = super().create(request, *args, **kwargs)
         response.status_code = 200
         return response
