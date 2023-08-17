@@ -18,12 +18,12 @@ class CategoryGenreBase(models.Model):
         return self.slug
 
 
-class Category(CategoryGenreBase):
+class Categories(CategoryGenreBase):
     class Meta(CategoryGenreBase.Meta):
         verbose_name = "Категория"
 
 
-class Genre(CategoryGenreBase):
+class Genres(CategoryGenreBase):
     class Meta(CategoryGenreBase.Meta):
         verbose_name = "Жанр"
 
@@ -33,14 +33,14 @@ class Title(models.Model):
     year = models.IntegerField()
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(
-        Genre,
+        Genres,
         related_name="titles",
     )
     category = models.ForeignKey(
-        Category,
+        Categories,
         models.SET_NULL,
-        related_name="titles",
-        null=True,
+        related_name="categories",
+        null=True
     )
 
     def __str__(self):
@@ -49,7 +49,6 @@ class Title(models.Model):
     def clean(self):
         if self.year > timezone.now().year:
             raise ValidationError("Year can't be in the future.")
-
 
 User = get_user_model()
 
@@ -70,3 +69,4 @@ class Comment(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
     pub_date = models.DateTimeField('Pub-date_', auto_now_add=True)
+

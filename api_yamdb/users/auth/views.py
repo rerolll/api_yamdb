@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -25,11 +26,11 @@ class SignUpView(generics.CreateAPIView):
         user.save()
         send_mail(
             fail_silently=True,
-            subject='Confirmation Code',
+            subject="Confirmation Code",
             message=(
-                'Thank you for registering with our service. '
-                'Please use the following confirmation code '
-                f'to activate your account: {user.confirmation_code}'
+                "Thank you for registering with our service. "
+                "Please use the following confirmation code "
+                f"to activate your account: {user.confirmation_code}"
             ),
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)

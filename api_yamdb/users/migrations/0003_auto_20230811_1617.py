@@ -4,30 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0002_alter_user_email'),
+        ("users", "0002_alter_user_email"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='user',
-            options={'verbose_name': 'пользователь', 'verbose_name_plural': 'Пользователи'},
+            name="user",
+            options={
+                "verbose_name": "пользователь",
+                "verbose_name_plural": "Пользователи",
+            },
         ),
         migrations.AddField(
-            model_name='user',
-            name='bio',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Био'),
+            model_name="user",
+            name="bio",
+            field=models.CharField(
+                blank=True, max_length=200, verbose_name="Био"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='confirmation_code',
-            field=models.TextField(default=100, verbose_name='Токен'),
+            model_name="user",
+            name="confirmation_code",
+            field=models.TextField(default=100, verbose_name="Токен"),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='user',
-            name='role',
-            field=models.TextField(default='user', verbose_name='Роль'),
+            model_name="user",
+            name="role",
+            field=models.TextField(default="user", verbose_name="Роль"),
         ),
     ]
