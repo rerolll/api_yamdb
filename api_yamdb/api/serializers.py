@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -5,6 +6,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Categories, Genres, Title
 from users.models import User
+
+from reviews.models import Review, Title, Category, Genre, Comment
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
@@ -82,10 +85,39 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = Genres
+        model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        reviews = obj.reviews.all()
+        if reviews.exists():
+            average_score = reviews.aggregate(Avg('score'))['score__avg']
+            return average_score
+        return None
+
     class Meta:
         fields = "__all__"
         model = Title
+
+
+class ReviewsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+        )
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+        )
+
+    class Meta:
+        fields = '__all__'
+        model = Comment
