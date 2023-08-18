@@ -237,6 +237,7 @@ class GenreViewSet(CategoryGenreViewSet):
     lookup_field = "slug"
 
 
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = (
         Title.objects.all().annotate(Avg("reviews__score")).order_by("name")
