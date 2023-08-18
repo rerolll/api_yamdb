@@ -1,3 +1,4 @@
+from django.core.validators import MaxLengthValidator
 from django.db.models import Avg
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
@@ -77,18 +78,21 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = "__all__"
+        fields = ('name', 'slug')
         model = Categories
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = "__all__"
+        fields = ["name", "slug"]
         model = Genres
 
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
+    category = serializers.StringRelatedField()
+    genre = serializers.StringRelatedField(many=True)
+
 
     def get_rating(self, obj):
         reviews = obj.reviews.all()
@@ -98,7 +102,15 @@ class TitleSerializer(serializers.ModelSerializer):
         return None
 
     class Meta:
-        fields = "__all__"
+        fields = [
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category',
+        ]
         model = Titles
 
 

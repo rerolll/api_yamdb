@@ -1,9 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import forms
 from django.utils import timezone
 
 
@@ -15,7 +13,7 @@ class CategoryGenreBase(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.slug
+        return self.name
 
 
 class Categories(CategoryGenreBase):
@@ -31,6 +29,7 @@ class Genres(CategoryGenreBase):
 class Titles(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
+    rating = models.IntegerField()
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(
         Genres,
