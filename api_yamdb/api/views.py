@@ -213,17 +213,18 @@ class CategoriesGenresViewSet(CreateListDestroyViewSet):
 
 
 class CategoryViewSet(CategoriesGenresViewSet):
-
     queryset = Categories.objects.all()
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
+
 
 class GenreViewSet(CategoriesGenresViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenreSerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
+
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
@@ -251,7 +252,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
     def get_title(self):
         title_id = self.kwargs.get('title_id')
-        return get_object_or_404(Title, pk=title_id)
+        return get_object_or_404(Titles, pk=title_id)
 
     def perform_create(self, serializer):
         title = self.get_title()
