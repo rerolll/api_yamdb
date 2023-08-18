@@ -1,6 +1,6 @@
 from django_filters.rest_framework import CharFilter, FilterSet
 
-from reviews.models import Titles
+from reviews.models import Title
 
 
 class TitlesFilter(FilterSet):
@@ -9,5 +9,5 @@ class TitlesFilter(FilterSet):
     genre = CharFilter(field_name="genre__slug", lookup_expr="contains")
 
     class Meta:
-        model = Titles
+        model = Title
         fields = ("name", "category", "genre", "year")

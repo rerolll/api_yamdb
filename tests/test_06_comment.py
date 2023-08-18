@@ -6,7 +6,7 @@ from tests.utils import (
     check_pagination,
     create_comments,
     create_reviews,
-    create_single_comment
+    create_single_comment,
 )
 
 

@@ -68,7 +68,18 @@ class User(AbstractUser):
     def check_confirmation_code(self, code):
         return self.confirmation_code == code
 
-
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "Пользователи"
+
+    @property
+    def is_admin(self):
+        return self.role == UserRoles.ADMIN.name
+
+    @property
+    def is_moderator(self):
+        return self.role == UserRoles.MODERATOR.name
+
+    @property
+    def is_user(self):
+        return self.role == UserRoles.USER.name

@@ -6,7 +6,7 @@ from tests.utils import (
     check_permissions,
     create_categories,
     create_genre,
-    create_titles
+    create_titles,
 )
 
 

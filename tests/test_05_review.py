@@ -8,7 +8,7 @@ from tests.utils import (
     check_pagination,
     create_reviews,
     create_single_review,
-    create_titles
+    create_titles,
 )
 
 
