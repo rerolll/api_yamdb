@@ -4,9 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Categories, Genres, Titles
 from users.models import User
-
 from reviews.models import Review, Titles, Categories, Genres, Comment
 
 
