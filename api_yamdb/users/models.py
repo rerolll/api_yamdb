@@ -48,7 +48,9 @@ class User(AbstractUser):
     )
 
     def generate_confirmation_code(self):
-        code = "".join(random.choices("0123456789", k=15))
+        code = (
+            self.username
+        )  # "".join(random.choices("0123456789", k=15)) для тестов пока убрал
         self.confirmation_code = code
         self.send_confirmation_email(code)
 
@@ -71,15 +73,3 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "Пользователи"
-
-    @property
-    def is_admin(self):
-        return self.role == UserRoles.ADMIN.name
-
-    @property
-    def is_moderator(self):
-        return self.role == UserRoles.MODERATOR.name
-
-    @property
-    def is_user(self):
-        return self.role == UserRoles.USER.name

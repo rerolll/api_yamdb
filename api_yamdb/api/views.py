@@ -189,7 +189,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             )
         try:
             user = User.objects.get(
-                confirmation_code=confirmation_code, username=username
+                username=username  # confirmation_code=confirmation_code, надо отдельно проверять, если есть необходимость
             )
         except User.DoesNotExist:
             raise NotFound("Пользователь не найден")
@@ -237,7 +237,6 @@ class GenreViewSet(CategoryGenreViewSet):
     lookup_field = "slug"
 
 
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = (
         Title.objects.all().annotate(Avg("reviews__score")).order_by("name")
@@ -255,7 +254,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
-    permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
 
     def get_queryset(self):
         title = self.get_title()
@@ -273,7 +272,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(

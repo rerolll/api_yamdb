@@ -4,6 +4,7 @@ from django.db.models import Avg
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -135,18 +136,42 @@ class ReviewsSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     author = serializers.SlugRelatedField(
-        slug_field="username", read_only=True
+        slug_field="username",
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
     )
 
     class Meta:
         fields = "__all__"
         model = Review
 
+    def validate(self, data):
+        if self.context["request"].method == "PATCH":
+            return data
+        title = self.context["view"].kwargs["title_id"]
+        author = self.context["request"].user
+        if Review.objects.filter(author=author, title__id=title).exists():
+            raise serializers.ValidationError(
+                "Нельзя оставлять более одного ревью!"
+            )
+        return data
+
+
+"""
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title')
+            )
+        ]
+"""
+
 
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(slug_field="text", read_only=True)
     author = serializers.SlugRelatedField(
-        slug_field="username", read_only=True
+        slug_field="username",
+        read_only=True,  # validators=[UniqueValidator(queryset=Comment.objects.all())]
     )
 
     class Meta:
