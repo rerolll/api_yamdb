@@ -48,9 +48,7 @@ class User(AbstractUser):
     )
 
     def generate_confirmation_code(self):
-        code = (
-            self.username
-        )  # "".join(random.choices("0123456789", k=15)) для тестов пока убрал
+        code = "".join(random.choices("0123456789", k=15))
         self.confirmation_code = code
         self.send_confirmation_email(code)
 

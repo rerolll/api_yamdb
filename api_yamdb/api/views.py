@@ -1,13 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
     filters,
     generics,
     permissions,
-    response,
     status,
     viewsets
 )
@@ -15,7 +14,6 @@ from rest_framework.exceptions import (
     AuthenticationFailed,
     NotFound,
     PermissionDenied,
-    ValidationError
 )
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
@@ -23,16 +21,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
 from .filters import TitlesFilter
 from .permissions import (
     IsAdmin,
-    IsAdminModeratorAuthorOrReadOnly,
     IsAdminOrReadOnly,
-    IsAuthorOrAdminOrModeratorOrReadOnly,
-    ReadOnly
+    IsAuthorOrAdminOrModeratorOrReadOnly
 )
 from .serializers import (
     CategorySerializer,
@@ -163,7 +159,7 @@ class UserRetrieveUpdateDestroyView(
         )
 
 
-class UserRetrieveUpdateView(generics.RetrieveAPIView, BasicUserUpdateView):
+class UserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRetrieveUpdateSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -189,7 +185,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             )
         try:
             user = User.objects.get(
-                username=username  # confirmation_code=confirmation_code, надо отдельно проверять, если есть необходимость
+                username=username  #, confirmation_code=confirmation_code, надо отдельно проверять
             )
         except User.DoesNotExist:
             raise NotFound("Пользователь не найден")

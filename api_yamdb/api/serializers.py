@@ -1,10 +1,6 @@
-from django.core.validators import MaxLengthValidator
-from django.db.models import Avg
-
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -171,7 +167,8 @@ class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(slug_field="text", read_only=True)
     author = serializers.SlugRelatedField(
         slug_field="username",
-        read_only=True,  # validators=[UniqueValidator(queryset=Comment.objects.all())]
+        read_only=True,
+        # validators=[UniqueValidator(queryset=Comment.objects.all())]
     )
 
     class Meta:
