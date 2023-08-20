@@ -3,17 +3,11 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (
-    filters,
-    generics,
-    permissions,
-    status,
-    viewsets
-)
+from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.exceptions import (
     AuthenticationFailed,
     NotFound,
-    PermissionDenied,
+    PermissionDenied
 )
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
@@ -184,9 +178,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            user = User.objects.get(
-                username=username  #, confirmation_code=confirmation_code, надо отдельно проверять
-            )
+            user = User.objects.get(username=username)
         except User.DoesNotExist:
             raise NotFound("Пользователь не найден")
         serializer = self.get_serializer(data=request.data)
