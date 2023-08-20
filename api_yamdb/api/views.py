@@ -73,7 +73,8 @@ class UserCreateView(BasicUserCreateView):
             existing_user.generate_confirmation_code()
             existing_user.save()
             response_data = {
-                "detail": "User already exists. New confirmation code has been sent."
+                "detail": """User already exists.
+                             New confirmation code has been sent."""
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
