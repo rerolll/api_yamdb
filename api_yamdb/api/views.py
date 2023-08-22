@@ -14,6 +14,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
@@ -189,12 +190,10 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if serializer.is_valid():
-            token = serializer.validated_data.get("access")
-            refresh_token = serializer.validated_data.get("refresh")
+            access_token = AccessToken.for_user(user)
             response_data = {
                 "ID пользователя": user.id,
-                "token": str(token),
-                "Обновление токена": str(refresh_token),
+                "token": str(access_token.access_token),
             }
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

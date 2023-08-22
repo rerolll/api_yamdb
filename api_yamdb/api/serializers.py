@@ -1,7 +1,7 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -65,18 +65,13 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         username = attrs.get("username")
         if confirmation_code and username:
             try:
-                user = User.objects.get(
+                User.objects.get(
                     confirmation_code=confirmation_code, username=username
                 )
             except User.DoesNotExist:
                 raise serializers.ValidationError(
                     "Неверные данные для выдачи токена."
                 )
-        if user:
-            refresh = RefreshToken.for_user(user)
-            attrs["user"] = user
-            attrs["access"] = str(refresh.access_token)
-            attrs["refresh"] = str(refresh)
         return attrs
 
 
