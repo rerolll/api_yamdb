@@ -70,3 +70,20 @@ class User(AbstractUser):
 
     def check_confirmation_code(self, code):
         return self.confirmation_code == code
+
+    @property
+    def is_admin(self):
+        return self.role == UserRoles.ADMIN
+
+    @property
+    def is_admin_or_staff(self):
+        if self.is_staff or self.role == UserRoles.ADMIN:
+            return True
+
+    @property
+    def is_admin_or_staff_or_mod(self):
+        if (
+            self.is_staff or self.role == UserRoles.ADMIN
+            or self.role == UserRoles.MODERATOR
+        ):
+            return True

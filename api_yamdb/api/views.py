@@ -35,7 +35,8 @@ from .serializers import (
     UserBasicSerializer,
     UserCreateSerializer,
     UserRetrieveUpdateDestroySerializer,
-    UserRetrieveUpdateSerializer
+    UserRetrieveUpdateSerializer,
+    CustomTokenObtainPairSerializer
 )
 from .viewsets import CreateListDestroyViewSet
 
@@ -166,37 +167,17 @@ class UserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
+    serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
-        confirmation_code = request.data.get("confirmation_code")
-        username = request.data.get("username")
-        if confirmation_code is None or username is None:
-            return Response(
-                {
-                    "error": (
-                        "Отсутствует обязательное поле или оно некорректно."
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise NotFound("Пользователь не найден")
         serializer = self.get_serializer(data=request.data)
-        if not user.check_confirmation_code(confirmation_code):
-            return Response(
-                {"error": "Некорректный код подтверждения"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if serializer.is_valid():
-            access_token = AccessToken.for_user(user)
-            response_data = {
-                "ID пользователя": user.id,
-                "token": str(access_token.access_token),
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = self.context.get("user")
+        access_token = AccessToken.for_user(user)
+        response_data = {
+            "token": str(access_token),
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class CategoryGenreViewSet(CreateListDestroyViewSet):

@@ -1,7 +1,6 @@
-from rest_framework import serializers, status
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -19,21 +18,8 @@ class UserBasicSerializer(serializers.ModelSerializer):
             "role",
         ]
 
-    def validate(self, attrs):
-        try:
-            return super().validate(attrs)
-        except ValidationError:
-            return Response(
-                {
-                    "error": (
-                        "Отсутствует обязательное поле или оно не корректно"
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-
-class UserCreateSerializer(UserBasicSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["email", "username"]
@@ -63,15 +49,12 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
     def validate(self, attrs):
         confirmation_code = attrs.get("confirmation_code")
         username = attrs.get("username")
-        if confirmation_code and username:
-            try:
-                User.objects.get(
-                    confirmation_code=confirmation_code, username=username
-                )
-            except User.DoesNotExist:
-                raise serializers.ValidationError(
-                    "Неверные данные для выдачи токена."
-                )
+        user = get_object_or_404(
+            User,
+            username=username
+        )
+        if user.confirmation_code != confirmation_code:
+            raise ValidationError
         return attrs
 
 

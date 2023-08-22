@@ -1,8 +1,11 @@
 from django.urls import path
 
-from . import views
+from api.views import CustomTokenObtainPairView, UserCreateView
 
 urlpatterns = [
-    path("token", views.token_view),
-    path("signup", views.SignUpView),
+    path(
+        "token/", CustomTokenObtainPairView.as_view(),
+        name="token_obtain_pair",
+    ),
+    path("signup/", UserCreateView.as_view(), name="user-create"),
 ]
