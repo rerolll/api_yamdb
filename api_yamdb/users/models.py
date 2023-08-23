@@ -1,6 +1,5 @@
-import random
-
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.core.validators import RegexValidator
 from django.db import models
@@ -47,14 +46,18 @@ class User(AbstractUser):
         verbose_name="Код подтверждения", max_length=15, blank=True, null=True
     )
 
+    class Meta:
+        verbose_name = "пользователь"
+        verbose_name_plural = "Пользователи"
+
     def generate_confirmation_code(self):
-        code = "".join(random.choices("0123456789", k=15))
-        self.confirmation_code = code
-        self.send_confirmation_email(code)
+        code = default_token_generator.make_token(self)
+        self.confirmation_code = code[:15]
+        self.send_confirmation_email(self.confirmation_code)
 
     def generate_confirmation_code_no_email(self):
-        code = "".join(random.choices("0123456789", k=15))
-        self.confirmation_code = code
+        code = default_token_generator.make_token(self)
+        self.confirmation_code = code[:15]
 
     def send_confirmation_email(self, code):
         subject = "Your confirmation code"
@@ -68,6 +71,19 @@ class User(AbstractUser):
     def check_confirmation_code(self, code):
         return self.confirmation_code == code
 
-    class Meta:
-        verbose_name = "пользователь"
-        verbose_name_plural = "Пользователи"
+    @property
+    def is_admin(self):
+        return self.role == UserRoles.ADMIN
+
+    @property
+    def is_admin_or_staff(self):
+        if self.is_staff or self.role == UserRoles.ADMIN:
+            return True
+
+    @property
+    def is_admin_or_staff_or_mod(self):
+        if (
+            self.is_staff or self.role == UserRoles.ADMIN
+            or self.role == UserRoles.MODERATOR
+        ):
+            return True

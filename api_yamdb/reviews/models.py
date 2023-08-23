@@ -4,6 +4,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+User = get_user_model()
+
 
 class CategoryGenreBase(models.Model):
     name = models.CharField(verbose_name="Название", max_length=256)
@@ -78,12 +80,6 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return str(self.id)
-
-    class Meta:
-        pass
-
-
-User = get_user_model()
 
 
 class Review(models.Model):
