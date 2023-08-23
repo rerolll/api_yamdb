@@ -172,7 +172,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = self.context.get("user")
+        user = serializer.validated_data.get("user")
         access_token = AccessToken.for_user(user)
         response_data = {
             "token": str(access_token),

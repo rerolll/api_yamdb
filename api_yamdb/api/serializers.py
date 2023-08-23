@@ -55,6 +55,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         )
         if user.confirmation_code != confirmation_code:
             raise ValidationError
+        attrs["user"] = user
         return attrs
 
 

@@ -52,12 +52,12 @@ class User(AbstractUser):
 
     def generate_confirmation_code(self):
         code = default_token_generator.make_token(self)
-        self.confirmation_code = code
-        self.send_confirmation_email(code)
+        self.confirmation_code = code[:15]
+        self.send_confirmation_email(self.confirmation_code)
 
     def generate_confirmation_code_no_email(self):
         code = default_token_generator.make_token(self)
-        self.confirmation_code = code
+        self.confirmation_code = code[:15]
 
     def send_confirmation_email(self, code):
         subject = "Your confirmation code"
