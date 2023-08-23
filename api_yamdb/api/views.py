@@ -227,7 +227,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = self.get_title()
-        queryset = Review.objects.filter(title=title)
+        queryset = title.reviews.all()
         return queryset
 
     def get_title(self):
@@ -235,7 +235,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         return get_object_or_404(Title, pk=title_id)
 
     def perform_create(self, serializer):
-        title = self.get_title()
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
 
 
