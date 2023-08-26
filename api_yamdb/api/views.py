@@ -9,9 +9,10 @@ from rest_framework.exceptions import (
     NotFound,
     PermissionDenied,
 )
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -26,7 +27,7 @@ from .permissions import (
     IsAuthorOrAdminOrModeratorOrReadOnly,
 )
 from .serializers import (
-    UserSerializer,
+    UserBasicSerializer,
     CategorySerializer,
     CommentSerializer,
     CustomTokenObtainPairSerializer,
@@ -34,9 +35,7 @@ from .serializers import (
     ReviewsSerializer,
     TitleSerializer,
     TitleSerializerGet,
-    UserBasicSerializer,
     UserCreateSerializer,
-    UserRetrieveUpdateDestroySerializer,
     UserRetrieveUpdateSerializer,
 )
 from .viewsets import CreateListDestroyViewSet
@@ -45,15 +44,15 @@ User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = UserBasicSerializer
     queryset = User.objects.all()
     permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ("username",)
     lookup_field = 'username'
+    http_method_names = ['get', 'post', 'delete', 'patch']
 
-    
     def get_object(self):
         username = self.kwargs.get("username")
         try:
@@ -65,14 +64,7 @@ class UserViewSet(viewsets.ModelViewSet):
         except AuthenticationFailed:
             raise AuthenticationFailed("Необходим JWT-токен")
         return user
-    
-    @action(detail=True, methods=["GET", "PATCH", "DELETE"], url_path="(?P<username>[^/.]+)")
-    def by_username(self, request, username=None):
-        user = self.get_object()
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
-    
-    
+
     def perform_create(self, serializer):
         user = serializer.save()
         user.generate_confirmation_code_no_email()
@@ -93,7 +85,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("Нет прав доступа")
         except AuthenticationFailed:
             raise AuthenticationFailed("Необходим JWT-токен")
-        
+
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
         user.delete()
@@ -102,36 +94,39 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-    def update(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Метод не разрешён"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+    @action(detail=False, methods=[
+        'get', 'post', 'patch', 'delete', 'put'
+    ], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        if request.method == 'DELETE':
+            return Response(
+                {"detail": "Метод не разрешён"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        if request.method == 'PUT':
+            return Response(
+                {"detail": "Метод не разрешён"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        user = request.user
+        serializer = UserRetrieveUpdateSerializer(
+            user, data=request.data, partial=True
         )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class BasicUserCreateView(generics.CreateAPIView):
+class UserCreateView(generics.CreateAPIView):
+    permission_classes = (permissions.AllowAny,)
+    queryset = User.objects.all()
+    serializer_class = UserCreateSerializer
+
     def perform_create(self, serializer):
         user = serializer.save()
         user.generate_confirmation_code()
         user.save()
-
-
-class BasicUserUpdateView(generics.RetrieveUpdateDestroyAPIView):
-    def patch(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", True)
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
-
-class UserCreateView(BasicUserCreateView):
-    permission_classes = (permissions.AllowAny,)
-    queryset = User.objects.all()
-    serializer_class = UserCreateSerializer
 
     def create(self, request, *args, **kwargs):
         username = request.data.get("username")
@@ -151,84 +146,6 @@ class UserCreateView(BasicUserCreateView):
         response = super().create(request, *args, **kwargs)
         response.status_code = 200
         return response
-
-
-class UserListCreateView(generics.CreateAPIView, ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRetrieveUpdateDestroySerializer
-    permission_classes = (IsAdmin,)
-    filter_backends = (filters.SearchFilter,)
-    pagination_class = PageNumberPagination
-    search_fields = ("username",)
-
-    def perform_create(self, serializer):
-        user = serializer.save()
-        user.generate_confirmation_code_no_email()
-        user.save()
-
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return UserBasicSerializer
-        return super().get_serializer_class()
-
-    def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except PermissionDenied:
-            raise PermissionDenied("Нет прав доступа")
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Необходим JWT-токен")
-
-    def list(self, request, *args, **kwargs):
-        try:
-            return super().list(request, *args, **kwargs)
-        except PermissionDenied:
-            raise PermissionDenied("Нет прав доступа")
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Необходим JWT-токен")
-
-
-class UserRetrieveUpdateDestroyView(
-    generics.RetrieveDestroyAPIView, BasicUserUpdateView
-):
-    serializer_class = UserRetrieveUpdateDestroySerializer
-    permission_classes = (IsAdmin,)
-    queryset = User.objects.all()
-
-    def get_object(self):
-        username = self.kwargs.get("username")
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise NotFound("Пользователь не найден")
-        except PermissionDenied:
-            raise PermissionDenied("Нет прав доступа")
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Необходим JWT-токен")
-        return user
-
-    def delete(self, request, *args, **kwargs):
-        user = self.get_object()
-        user.delete()
-        return Response(
-            {"message": "Удачное выполнение запроса"},
-            status=status.HTTP_204_NO_CONTENT,
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Метод не разрешён"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
-        )
-
-
-class UserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRetrieveUpdateSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get_object(self):
-        return self.request.user
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

@@ -30,19 +30,6 @@ class UserRetrieveUpdateSerializer(UserBasicSerializer):
     role = serializers.ReadOnlyField()
 
 
-class UserRetrieveUpdateDestroySerializer(UserBasicSerializer):
-    class Meta:
-        model = User
-        fields = [
-            "username",
-            "email",
-            "role",
-            "first_name",
-            "last_name",
-            "bio",
-        ]
-
-
 class CustomTokenObtainPairSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(write_only=True)
     username = serializers.CharField(write_only=True)

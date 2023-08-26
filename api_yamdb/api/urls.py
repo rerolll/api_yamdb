@@ -9,9 +9,6 @@ from .views import (
     GenreViewSet,
     ReviewsViewSet,
     TitleViewSet,
-    UserListCreateView,
-    UserRetrieveUpdateDestroyView,
-    UserRetrieveUpdateView,
 )
 
 router = DefaultRouter()
@@ -33,11 +30,4 @@ router.register(
 urlpatterns = [
     path("", include(router.urls)),
     path("auth/", include("users.auth.urls")),
-    path("users/me/", UserRetrieveUpdateView.as_view(), name="user-update"),
-    path("users/", UserListCreateView.as_view(), name="user-list"),
-    path(
-        "users/<username>/",
-        UserRetrieveUpdateDestroyView.as_view(),
-        name="user-retrieve-delete",
-    ),
 ]

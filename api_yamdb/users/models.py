@@ -72,6 +72,10 @@ class User(AbstractUser):
         return self.confirmation_code == code
 
     @property
+    def is_user(self):
+        return self.role == UserRoles.USER
+
+    @property
     def is_admin(self):
         return self.role == UserRoles.ADMIN
 
