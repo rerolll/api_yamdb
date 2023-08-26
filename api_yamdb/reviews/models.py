@@ -103,6 +103,8 @@ class Review(models.Model):
                 fields=["author", "title"], name="unique_author_review"
             )
         ]
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
 
 
 class Comment(models.Model):
@@ -114,3 +116,7 @@ class Comment(models.Model):
         User, on_delete=models.CASCADE, related_name="reviews"
     )
     pub_date = models.DateTimeField("Pub-date_", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"

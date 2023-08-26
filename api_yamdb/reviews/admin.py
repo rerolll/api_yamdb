@@ -4,13 +4,11 @@ from django.contrib import admin
 from .models import Category, Comment, Genre, Review, Title
 
 
+@admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "description"]
     list_filter = ["name", "description"]
     search_fields = ["name"]
-
-
-admin.site.register(Title, TitleAdmin)
 
 
 class ReviewAdminForm(forms.ModelForm):
@@ -21,6 +19,7 @@ class ReviewAdminForm(forms.ModelForm):
     title = forms.ModelChoiceField(queryset=Title.objects.all(), required=True)
 
 
+@admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     title = forms.ModelChoiceField(queryset=Title.objects.all(), required=True)
     list_display = ["text", "id", "pub_date", "author"]
@@ -29,31 +28,22 @@ class ReviewAdmin(admin.ModelAdmin):
     form = ReviewAdminForm
 
 
-admin.site.register(Review, ReviewAdmin)
-
-
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["name", "slug"]
     list_filter = ["name", "slug"]
     search_fields = ["name"]
 
 
-admin.site.register(Category, CategoryAdmin)
-
-
+@admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ["name", "slug"]
     list_filter = ["name", "slug"]
     search_fields = ["name"]
 
 
-admin.site.register(Genre, GenreAdmin)
-
-
+@admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ["text", "id"]
     list_filter = ["text", "id"]
     search_fields = ["text"]
-
-
-admin.site.register(Comment, CommentAdmin)
