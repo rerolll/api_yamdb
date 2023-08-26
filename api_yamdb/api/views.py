@@ -26,6 +26,7 @@ from .permissions import (
     IsAuthorOrAdminOrModeratorOrReadOnly,
 )
 from .serializers import (
+    UserSerializer,
     CategorySerializer,
     CommentSerializer,
     CustomTokenObtainPairSerializer,
@@ -41,6 +42,71 @@ from .serializers import (
 from .viewsets import CreateListDestroyViewSet
 
 User = get_user_model()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    pagination_class = PageNumberPagination
+    search_fields = ("username",)
+    lookup_field = 'username'
+
+    
+    def get_object(self):
+        username = self.kwargs.get("username")
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound("Пользователь не найден")
+        except PermissionDenied:
+            raise PermissionDenied("Нет прав доступа")
+        except AuthenticationFailed:
+            raise AuthenticationFailed("Необходим JWT-токен")
+        return user
+    
+    @action(detail=True, methods=["GET", "PATCH", "DELETE"], url_path="(?P<username>[^/.]+)")
+    def by_username(self, request, username=None):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+    
+    
+    def perform_create(self, serializer):
+        user = serializer.save()
+        user.generate_confirmation_code_no_email()
+        user.save()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except PermissionDenied:
+            raise PermissionDenied("Нет прав доступа")
+        except AuthenticationFailed:
+            raise AuthenticationFailed("Необходим JWT-токен")
+
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except PermissionDenied:
+            raise PermissionDenied("Нет прав доступа")
+        except AuthenticationFailed:
+            raise AuthenticationFailed("Необходим JWT-токен")
+        
+    def delete(self, request, *args, **kwargs):
+        user = self.get_object()
+        user.delete()
+        return Response(
+            {"message": "Удачное выполнение запроса"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "Метод не разрешён"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
 
 class BasicUserCreateView(generics.CreateAPIView):
