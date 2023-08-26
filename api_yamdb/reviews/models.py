@@ -36,7 +36,7 @@ class Genre(CategoryGenreBase):
 class Title(models.Model):
     name = models.CharField(verbose_name="Название", max_length=256)
     year = models.PositiveSmallIntegerField(
-        verbose_name="Дата выхода", validators=[validate_year]
+        verbose_name="Дата выхода", db_index=True, validators=[validate_year]
     )
     description = models.TextField(
         verbose_name="Описание", null=True, blank=True
