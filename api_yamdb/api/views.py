@@ -181,7 +181,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class CategoryGenreViewSet(CreateListDestroyViewSet):
-    pagination_class = PageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
     permission_classes = (IsAdminOrReadOnly,)
