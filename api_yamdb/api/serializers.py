@@ -44,7 +44,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         return attrs
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class GenreCategorySerializer(serializers.ModelSerializer):
     lookup_field = "slug"
 
     class Meta:
@@ -52,17 +52,15 @@ class CategorySerializer(serializers.ModelSerializer):
             "name",
             "slug",
         )
+
+
+class CategorySerializer(GenreCategorySerializer):
+    class Meta(GenreCategorySerializer.Meta):
         model = Category
 
 
-class GenreSerializer(serializers.ModelSerializer):
-    lookup_field = "slug"
-
-    class Meta:
-        fields = (
-            "name",
-            "slug",
-        )
+class GenreSerializer(GenreCategorySerializer):
+    class Meta(GenreCategorySerializer.Meta):
         model = Genre
 
 
@@ -100,10 +98,6 @@ class TitleSerializer(TitleSerializerGet):
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
-    title = serializers.SlugRelatedField(
-        slug_field="name",
-        read_only=True,
-    )
     author = serializers.SlugRelatedField(
         slug_field="username",
         read_only=True,
@@ -111,7 +105,13 @@ class ReviewsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = "__all__"
+        fields = [
+            "id",
+            "text",
+            "author",
+            "score",
+            "pub_date",
+        ]
         model = Review
 
     def validate(self, data):
@@ -127,12 +127,16 @@ class ReviewsSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    review = serializers.SlugRelatedField(slug_field="text", read_only=True)
     author = serializers.SlugRelatedField(
         slug_field="username",
         read_only=True,
     )
 
     class Meta:
-        fields = "__all__"
+        fields = [
+            "id",
+            "text",
+            "author",
+            "pub_date",
+        ]
         model = Comment
