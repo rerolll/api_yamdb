@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import timezone
+
+from .validators import validate_year
 
 User = get_user_model()
 
@@ -35,9 +35,8 @@ class Genre(CategoryGenreBase):
 
 class Title(models.Model):
     name = models.CharField(verbose_name="Название", max_length=256)
-    year = models.PositiveSmallIntegerField(verbose_name="Дата выхода")
-    rating = models.PositiveSmallIntegerField(
-        verbose_name="Рейтинг", null=True, default=None
+    year = models.PositiveSmallIntegerField(
+        verbose_name="Дата выхода", validators=[validate_year]
     )
     description = models.TextField(
         verbose_name="Описание", null=True, blank=True
@@ -62,24 +61,6 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
-    def clean(self):
-        if self.year > timezone.now().year:
-            raise ValidationError("Year can't be in the future.")
-
-
-class GenreTitle(models.Model):
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-    )
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.CASCADE,
-    )
-
-    def __str__(self):
-        return str(self.id)
 
 
 class Review(models.Model):

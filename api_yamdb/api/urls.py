@@ -10,7 +10,7 @@ from .views import (
     TitleViewSet,
     UserListCreateView,
     UserRetrieveUpdateDestroyView,
-    UserRetrieveUpdateView,
+    UserRetrieveUpdateView
 )
 
 router = DefaultRouter()
