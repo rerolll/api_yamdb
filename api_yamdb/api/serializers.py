@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -49,10 +50,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
     def validate(self, attrs):
         confirmation_code = attrs.get("confirmation_code")
         username = attrs.get("username")
-        user = get_object_or_404(
-            User,
-            username=username
-        )
+        user = get_object_or_404(User, username=username)
         if user.confirmation_code != confirmation_code:
             raise ValidationError
         attrs["user"] = user
@@ -63,7 +61,10 @@ class CategorySerializer(serializers.ModelSerializer):
     lookup_field = "slug"
 
     class Meta:
-        fields = ("name", "slug",)
+        fields = (
+            "name",
+            "slug",
+        )
         model = Category
 
 
@@ -71,7 +72,10 @@ class GenreSerializer(serializers.ModelSerializer):
     lookup_field = "slug"
 
     class Meta:
-        fields = ("name", "slug",)
+        fields = (
+            "name",
+            "slug",
+        )
         model = Genre
 
 

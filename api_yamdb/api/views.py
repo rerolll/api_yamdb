@@ -7,14 +7,14 @@ from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.exceptions import (
     AuthenticationFailed,
     NotFound,
-    PermissionDenied
+    PermissionDenied,
 )
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
@@ -23,11 +23,12 @@ from .filters import TitlesFilter
 from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
-    IsAuthorOrAdminOrModeratorOrReadOnly
+    IsAuthorOrAdminOrModeratorOrReadOnly,
 )
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
+    CustomTokenObtainPairSerializer,
     GenreSerializer,
     ReviewsSerializer,
     TitleSerializer,
@@ -36,7 +37,6 @@ from .serializers import (
     UserCreateSerializer,
     UserRetrieveUpdateDestroySerializer,
     UserRetrieveUpdateSerializer,
-    CustomTokenObtainPairSerializer
 )
 from .viewsets import CreateListDestroyViewSet
 
@@ -235,7 +235,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         return get_object_or_404(Title, pk=title_id)
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        title = get_object_or_404(Title, id=self.kwargs["title_id"])
         serializer.save(author=self.request.user, title=title)
 
 
