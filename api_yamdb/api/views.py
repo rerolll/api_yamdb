@@ -4,11 +4,6 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.exceptions import (
-    AuthenticationFailed,
-    NotFound,
-    PermissionDenied
-)
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -55,36 +50,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         username = self.kwargs.get("username")
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise NotFound("Пользователь не найден")
-        except PermissionDenied:
-            raise PermissionDenied("Нет прав доступа")
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Необходим JWT-токен")
-        return user
+        return get_object_or_404(User, username=username)
 
     def perform_create(self, serializer):
         user = serializer.save()
         user.generate_confirmation_code_no_email()
         user.save()
-
-    def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except PermissionDenied:
-            raise PermissionDenied("Нет прав доступа")
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Необходим JWT-токен")
-
-    def list(self, request, *args, **kwargs):
-        try:
-            return super().list(request, *args, **kwargs)
-        except PermissionDenied:
-            raise PermissionDenied("Нет прав доступа")
-        except AuthenticationFailed:
-            raise AuthenticationFailed("Необходим JWT-токен")
 
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
@@ -93,10 +64,13 @@ class UserViewSet(viewsets.ModelViewSet):
             {"message": "Удачное выполнение запроса"},
             status=status.HTTP_204_NO_CONTENT,
         )
-
-    @action(detail=False, methods=[
-        'get', 'post', 'patch', 'delete', 'put'
-    ], permission_classes=[IsAuthenticated])
+    """Не могу убрать методы, т.к этот action обрабатывает и list и
+    отдельный объект. Если их убрать, delete и patch
+    он отказывается обрабатывать, даже если ловить их в коде.
+    Единственный вариант могу отдельный action под объект написать."""
+    @action(detail=False, permission_classes=[IsAuthenticated], methods=[
+        "get", "post", "patch", "delete"
+    ])
     def me(self, request):
         if request.method == 'DELETE':
             return Response(
@@ -136,15 +110,15 @@ class UserCreateView(generics.CreateAPIView):
             existing_user.generate_confirmation_code()
             existing_user.save()
             response_data = {
-                "detail": """User already exists.
-                             New confirmation code has been sent."""
+                "email": email,
+                "username": username
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             pass
 
         response = super().create(request, *args, **kwargs)
-        response.status_code = 200
+        response.status_code = status.HTTP_200_OK
         return response
 
 
