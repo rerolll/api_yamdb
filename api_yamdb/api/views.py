@@ -47,36 +47,24 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ("username",)
     lookup_field = 'username'
     http_method_names = ['get', 'post', 'delete', 'patch']
+    # def get_object(self):
+    #     username = self.kwargs.get("username")
+    #     return get_object_or_404(User, username=username)
+    # def perform_create(self, serializer):
+    #     user = serializer.save()
+    #     user.generate_confirmation_code_no_email()
+    #     user.save()
+    # def delete(self, request, *args, **kwargs):
+    #     user = self.get_object()
+    #     user.delete()
+    #     return Response(
+    #         {"message": "Удачное выполнение запроса"},
+    #         status=status.HTTP_204_NO_CONTENT,
+    #     )
 
-    def get_object(self):
-        username = self.kwargs.get("username")
-        return get_object_or_404(User, username=username)
-
-    def perform_create(self, serializer):
-        user = serializer.save()
-        user.generate_confirmation_code_no_email()
-        user.save()
-
-    def delete(self, request, *args, **kwargs):
-        user = self.get_object()
-        user.delete()
-        return Response(
-            {"message": "Удачное выполнение запроса"},
-            status=status.HTTP_204_NO_CONTENT,
-        )
-    """Не могу убрать методы, т.к этот action обрабатывает и list и
-    отдельный объект. Если их убрать, delete и patch
-    он отказывается обрабатывать, даже если ловить их в коде.
-    Единственный вариант могу отдельный action под объект написать."""
-    @action(detail=False, permission_classes=[IsAuthenticated], methods=[
-        "get", "post", "patch", "delete"
-    ])
+    @action(methods=['GET', 'PATCH'], detail=False,
+            permission_classes=(IsAuthenticated,), url_path='me')
     def me(self, request):
-        if request.method == 'DELETE':
-            return Response(
-                {"detail": "Метод не разрешён"},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
         if request.method == 'PUT':
             return Response(
                 {"detail": "Метод не разрешён"},
