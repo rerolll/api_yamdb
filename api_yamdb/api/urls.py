@@ -9,6 +9,8 @@ from .views import (
     GenreViewSet,
     ReviewsViewSet,
     TitleViewSet,
+    CustomTokenObtainPairView,
+    UserCreateView
 )
 
 router = DefaultRouter()
@@ -27,7 +29,16 @@ router.register(
     basename="review-comments",
 )
 
+auth_urls = [
+    path(
+        "token/",
+        CustomTokenObtainPairView.as_view(),
+        name="token_obtain_pair",
+    ),
+    path("signup/", UserCreateView.as_view(), name="user-create"),
+]
+
 urlpatterns = [
     path("", include(router.urls)),
-    path("auth/", include("users.auth.urls")),
+    path("auth/", include(auth_urls)),
 ]
