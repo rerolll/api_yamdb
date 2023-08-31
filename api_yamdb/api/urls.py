@@ -3,14 +3,14 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    UserViewSet,
     CategoryViewSet,
     CommentViewSet,
+    CustomTokenObtainPairView,
     GenreViewSet,
     ReviewsViewSet,
     TitleViewSet,
-    CustomTokenObtainPairView,
-    UserCreateView
+    UserCreateView,
+    UserViewSet
 )
 
 router = DefaultRouter()

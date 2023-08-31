@@ -22,7 +22,6 @@ from .permissions import (
     IsAuthorOrAdminOrModeratorOrReadOnly
 )
 from .serializers import (
-    UserBasicSerializer,
     CategorySerializer,
     CommentSerializer,
     CustomTokenObtainPairSerializer,
@@ -30,8 +29,9 @@ from .serializers import (
     ReviewsSerializer,
     TitleSerializer,
     TitleSerializerGet,
+    UserBasicSerializer,
     UserCreateSerializer,
-    UserRetrieveUpdateSerializer,
+    UserRetrieveUpdateSerializer
 )
 from .viewsets import CreateListDestroyViewSet
 
@@ -45,30 +45,20 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ("username",)
-    lookup_field = 'username'
-    http_method_names = ['get', 'post', 'delete', 'patch']
-    # def get_object(self):
-    #     username = self.kwargs.get("username")
-    #     return get_object_or_404(User, username=username)
-    # def perform_create(self, serializer):
-    #     user = serializer.save()
-    #     user.generate_confirmation_code_no_email()
-    #     user.save()
-    # def delete(self, request, *args, **kwargs):
-    #     user = self.get_object()
-    #     user.delete()
-    #     return Response(
-    #         {"message": "Удачное выполнение запроса"},
-    #         status=status.HTTP_204_NO_CONTENT,
-    #     )
+    lookup_field = "username"
+    http_method_names = ["get", "post", "delete", "patch"]
 
-    @action(methods=['GET', 'PATCH'], detail=False,
-            permission_classes=(IsAuthenticated,), url_path='me')
+    @action(
+        methods=["GET", "PATCH"],
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_path="me",
+    )
     def me(self, request):
-        if request.method == 'PUT':
+        if request.method == "PUT":
             return Response(
                 {"detail": "Метод не разрешён"},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
             )
         user = request.user
         serializer = UserRetrieveUpdateSerializer(
@@ -97,10 +87,7 @@ class UserCreateView(generics.CreateAPIView):
             existing_user = User.objects.get(username=username, email=email)
             existing_user.generate_confirmation_code()
             existing_user.save()
-            response_data = {
-                "email": email,
-                "username": username
-            }
+            response_data = {"email": email, "username": username}
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             pass
